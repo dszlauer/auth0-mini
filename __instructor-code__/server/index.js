@@ -55,26 +55,7 @@ app.get("/auth/callback", (req, res) => {
   // Write a function that accepts the userInfo as a parameter and returns a block of code.
   // Your code should set session, check your database to see if user exists and return their info or if they don't exist, insert them into the database.
   function storeUserInfoInDataBase(userInfoResponse) {
-    const userData = userInfoResponse.data;
-    const db = req.app.get("db");
-    db.find_user_by_auth0_id(userData.sub).then(user => {
-      if (user.length) {
-        req.session.user = user;
-        res.redirect("/");
-      } else {
-        const createUser = [
-          userData.sub,
-          userData.email,
-          userData.name,
-          userData.picture
-        ];
-
-        return db.create_user(createUser).then(() => {
-          req.session.user = newUser[0];
-          res.redirect("/");
-        });
-      }
-    });
+    console.log(userInfoResponse.data);
   }
 
   // Final code; uncomment after completing steps 1-4 above.

@@ -1,25 +1,44 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import axios from 'axios';
+import React, { Component } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import axios from "axios";
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
       user: null,
-      secureDataResponse: null,
+      secureDataResponse: null
     };
     this.logout = this.logout.bind(this);
     this.fetchSecureData = this.fetchSecureData.bind(this);
   }
 
+  componentDidMount() {
+    axios.get("/api/user-data").then(response => {
+      this.setState({
+        user: response.data.user || null
+      });
+    });
+  }
+
+  // login checking back with .env wich will send the login process to Auth0
+  // "&scope=openid%20email%20profile&redirect_uri=${redirectUri}" this is asking Auth0 to send this back to our server when successfuly authenticated
+  // const redirectUri is set with a static address so we dont have to retype it
   login() {
-    alert('Need to implement the login() method in App.js!');
+    const redirectUri = encodeURIComponent(
+      `${window.location.origin}/auth/callback`
+    );
+
+    window.location = `https://${
+      process.env.REACT_APP_AUTH0_DOMAIN
+    }/authorize?client_id=${
+      process.env.REACT_APP_AUTH0_CLIENT_ID
+    }&scope=openid%20email%20profile&redirect_uri=${redirectUri}&response_type=code`;
   }
 
   logout() {
-    axios.post('/api/logout').then(() => {
+    axios.post("/api/logout").then(() => {
       this.setState({ user: null });
     });
   }
@@ -33,11 +52,16 @@ class App extends Component {
   }
 
   fetchSecureData() {
-    axios.get('/api/secure-data').then(response => {
-      this.setState({ secureDataResponse: JSON.stringify(response.data, null, 2) });
-    }).catch(error => {
-      this.setState({ secureDataResponse: this.getMessage(error) });
-    })
+    axios
+      .get("/api/secure-data")
+      .then(response => {
+        this.setState({
+          secureDataResponse: JSON.stringify(response.data, null, 2)
+        });
+      })
+      .catch(error => {
+        this.setState({ secureDataResponse: this.getMessage(error) });
+      });
   }
 
   render() {
@@ -52,17 +76,20 @@ class App extends Component {
         </header>
         <div className="App-intro">
           <div className="section">
-            <button onClick={this.login}>Log in</button>
-            {' '}
+            <button onClick={this.login}>Log in</button>{" "}
             <button onClick={this.logout}>Log out</button>
           </div>
           <div className="section">
             <h2>User data:</h2>
-            <div><pre>{userData || 'null'}</pre></div>
+            <div>
+              <pre>{userData || "null"}</pre>
+            </div>
           </div>
           <div className="section">
             <button onClick={this.fetchSecureData}>Fetch secure data</button>
-            <div><pre>{secureDataResponse}</pre></div>
+            <div>
+              <pre>{secureDataResponse}</pre>
+            </div>
           </div>
         </div>
       </div>
